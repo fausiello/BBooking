@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BBooking.Models.Entities;
 public class Servizio
     {
