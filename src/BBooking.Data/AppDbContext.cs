@@ -20,6 +20,15 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Configurazione precisione per i campi decimali (evita warning EF Core)
+        modelBuilder.Entity<CasaVacanze>()
+            .Property(c => c.PrezzoPerNotte)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Prenotazione>()
+            .Property(p => p.Totale)
+            .HasPrecision(18, 2);
+
         // 1. Configurazione Relazione N:N pura tra CasaVacanze e Servizio
         modelBuilder.Entity<CasaVacanze>()
             .HasMany(c => c.Servizi)

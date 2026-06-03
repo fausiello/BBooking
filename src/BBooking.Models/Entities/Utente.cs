@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BBooking.Models.Entities;
   public class Utente
     {
@@ -15,9 +18,9 @@ namespace BBooking.Models.Entities;
         public RuoloUtente Ruolo { get; set; } = RuoloUtente.Guest; // Default a Guest
 
         // Navigation Properties
-        [InverseProperty(nameof(Models.CasaVacanze.Host))]
+        [InverseProperty(nameof(CasaVacanze.Host))]
         public ICollection<CasaVacanze> CaseOspitate { get; set; } = new List<CasaVacanze>();
 
-        [InverseProperty(nameof(Models.Prenotazione.Guest))]
+        [InverseProperty(nameof(Prenotazione.Guest))]
         public ICollection<Prenotazione> PrenotazioniEffettuate { get; set; } = new List<Prenotazione>();
     }

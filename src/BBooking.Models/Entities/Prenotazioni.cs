@@ -1,3 +1,6 @@
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BBooking.Models.Entities;
   public class Prenotazione
     {
