@@ -11,6 +11,7 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using BBooking.Api.Controllers;
 using Asp.Versioning;
+using BBooking.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,12 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
+
+// --- Configurazione Client gRPC ---
+builder.Services.AddGrpcClient<PagamentoService.PagamentoServiceClient>(options =>
+{
+    options.Address = new Uri("https://localhost:7001");
+});
 
 // --- Configurazione API Versioning ---
 builder.Services.AddApiVersioning(options =>

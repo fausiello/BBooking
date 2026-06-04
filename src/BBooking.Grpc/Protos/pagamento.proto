@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "BBooking.Grpc";
+
+package BBooking.Grpc;
+
+service PagamentoService {
+  rpc ElaboraPagamento (PagamentoRequest) returns (PagamentoResponse);
+}
+
+message PagamentoRequest {
+  int32 prenotazioneId = 1;
+  double importo = 2;
+  string emailCliente = 3;
+}
+
+message PagamentoResponse {
+  bool successo = 1;
+  string transazioneId = 2;
+  string messaggio = 3;
+}
