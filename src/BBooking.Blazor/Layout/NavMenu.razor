@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@inject BBooking.Blazor.Services.CustomAuthStateProvider AuthStateProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BBooking.Blazor</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -15,6 +19,11 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="case">
+                <span class="bi bi-list-ul-nav-menu" aria-hidden="true"></span> Esplora Strutture
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
             </NavLink>
@@ -24,6 +33,28 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
             </NavLink>
         </div>
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3 mt-3 border-top pt-2">
+                    <span class="nav-link text-white-50 small">
+                        <i class="bi bi-person-circle"></i> Ciao, @context.User.Identity?.Name
+                    </span>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" @onclick="EseguiLogout">
+                        <span class="bi bi-box-arrow-right-nav-menu" aria-hidden="true"></span> Esci
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3 mt-3 border-top pt-2">
+                    <NavLink class="nav-link" href="login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Accedi
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </nav>
 </div>
 
@@ -35,5 +66,11 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task EseguiLogout()
+    {
+        await AuthStateProvider.NotificaSitoLogout();
+        Navigation.NavigateTo("/");
     }
 }

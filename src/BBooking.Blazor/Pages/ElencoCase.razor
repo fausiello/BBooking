@@ -1,0 +1,101 @@
+@page "/case"
+@using BBooking.Models.Entities
+@using System.Net.Http.Json
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Elenco Case Vacanze - BBooking</PageTitle>
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-primary">Esplora le nostre Case Vacanze</h1>
+
+    @if (caseVacanze == null)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Caricamento in corso...</span>
+            </div>
+            <span class="ms-3 h5">Caricamento in corso...</span>
+        </div>
+    }
+    else if (caseVacanze.Count == 0)
+    {
+        <div class="alert alert-info">
+            Non ci sono case vacanze disponibili al momento.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var casa in caseVacanze)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0">
+                        @* Immagine segnaposto o reale se disponibile nel DTO *@
+                        <img src="https://via.placeholder.com/400x250?text=@(casa.Nome)" class="card-img-top" alt="@casa.Nome">
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">@casa.Nome</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="bi bi-geo-alt-fill"></i> @(casa.Localita?.Nome ?? "Località non specificata")
+                            </h6>
+                            <p class="card-text text-truncate-3 flex-grow-1">
+                                @casa.Descrizione
+                            </p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h5 mb-0 text-success fw-bold">€ @casa.PrezzoPerNotte<small class="text-muted fw-normal">/notte</small></span>
+                                </div>
+                                <button class="btn btn-primary w-100" @onclick="() => VaiADettagli(casa.Id)">
+                                    Dettagli / Prenota
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<CasaVacanze>? caseVacanze;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Chiamata all'endpoint delle Web API
+            caseVacanze = await Http.GetFromJsonAsync<List<CasaVacanze>>("api/v1/case");
+        }
+        catch (Exception ex)
+        {
+            // Gestione errore (si potrebbe loggare o mostrare un messaggio all'utente)
+            Console.WriteLine($"Errore nel caricamento delle case: {ex.Message}");
+            caseVacanze = new List<CasaVacanze>();
+        }
+    }
+
+    private void VaiADettagli(int id)
+    {
+        Navigation.NavigateTo($"/case/{id}");
+    }
+}
+
+<style>
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>

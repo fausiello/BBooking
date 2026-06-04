@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -48,7 +48,7 @@ builder.Services.AddOpenApiDocument(config =>
         In = OpenApiSecurityApiKeyLocation.Header,
         Description = "Inserisci il token JWT in questo formato: Bearer {il_tuo_token}"
     });
-    
+
     config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
 
@@ -85,9 +85,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireGuestRole", policy => policy.RequireRole(RuoloUtente.Guest.ToString(), RuoloUtente.Admin.ToString()));
 });
 
-builder.Services.AddCors(options => 
-    options.AddPolicy("AllowBlazor", policy => 
-        policy.WithOrigins("https://localhost:5001", "http://localhost:5000")
+builder.Services.AddCors(options =>
+    options.AddPolicy("AllowBlazor", policy =>
+        policy.WithOrigins("https://localhost:5001", "http://localhost:5000", "https://localhost:7153", "http://localhost:5038")
               .AllowAnyMethod()
               .AllowAnyHeader())
 );

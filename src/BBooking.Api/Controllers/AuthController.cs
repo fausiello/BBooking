@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -29,7 +29,7 @@ public class AuthController : ControllerBase
     {
         if (await _db.Utenti.AnyAsync(u => u.Email == request.Email))
         {
-            return BadRequest("Un utente con questa email esiste già.");
+            return BadRequest("Un utente con questa email esiste gia.");
         }
 
         var user = new Utente
@@ -49,13 +49,19 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var user = await _db.Utenti.SingleOrDefaultAsync(u => u.Email == request.Email);
+        // 1. Ricerca l'utente per Email (case-insensitive)
+        // Usiamo FirstOrDefaultAsync invece di SingleOrDefault per evitare crash in caso di duplicati imprevisti
+        var user = await _db.Utenti.FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower());
 
+        // 2. Verifica della Password
+        // Poiche il Seed Data usa password in chiaro (es. "Admin123"), eseguiamo un confronto diretto.
+        // In un sistema reale, qui useremmo un PasswordHasher.
         if (user == null || user.Password != request.Password)
         {
-            return Unauthorized("Credenziali non valide.");
+            return Unauthorized("Email o password non validi.");
         }
 
+        // 3. Generazione del Token JWT
         var jwtSection = _config.GetSection("Jwt");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -63,6 +69,7 @@ public class AuthController : ControllerBase
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Nome),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Ruolo.ToString())
         };
@@ -75,7 +82,13 @@ public class AuthController : ControllerBase
             signingCredentials: creds
         );
 
-        return Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token), Ruolo = user.Ruolo.ToString() });
+        // 4. Risposta con Token e metadati (camelCase gestito automaticamente dal middleware)
+        return Ok(new 
+        { 
+            Token = new JwtSecurityTokenHandler().WriteToken(token), 
+            Ruolo = user.Ruolo.ToString(),
+            Username = user.Nome
+        });
     }
 }
 

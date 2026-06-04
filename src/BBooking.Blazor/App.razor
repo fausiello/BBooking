@@ -1,6 +1,27 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-</Router>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <div class="container mt-4">
+                        <div class="alert alert-danger" role="alert">
+                            <h4>Accesso negato</h4>
+                            <p>Non hai i permessi necessari per visualizzare questa pagina o non sei autenticato.</p>
+                            <hr>
+                            <a href="/login" class="btn btn-outline-danger">Vai al Login</a>
+                        </div>
+                    </div>
+                </NotAuthorized>
+                <Authorizing>
+                    <div class="d-flex justify-content-center mt-5">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Autorizzazione in corso...</span>
+                        </div>
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+    </Router>
+</CascadingAuthenticationState>
