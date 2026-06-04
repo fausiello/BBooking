@@ -5,6 +5,7 @@ using System.Security.Claims;
 using BBooking.Data;
 using BBooking.Models.Entities;
 using Asp.Versioning;
+using BBooking.Grpc;
 
 namespace BBooking.Api.Controllers;
 
@@ -14,10 +15,12 @@ namespace BBooking.Api.Controllers;
 public class PrenotazioniController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly PagamentoService.PagamentoServiceClient _grpcClient;
 
-    public PrenotazioniController(AppDbContext db)
+    public PrenotazioniController(AppDbContext db, PagamentoService.PagamentoServiceClient grpcClient)
     {
         _db = db;
+        _grpcClient = grpcClient;
     }
 
     [HttpGet("mie")]
@@ -64,8 +67,15 @@ public class PrenotazioniController : ControllerBase
         int notti = (int)(request.DataFine - request.DataInizio).TotalDays;
         decimal totale = casa.PrezzoPerNotte * notti;
 
-        // --- SIMULAZIONE PAGAMENTO ---
-        bool pagamentoCompletato = SimulaPagamento(totale);
+        // --- INTEGRAZIONE PAGAMENTO TRAMITE gRPC ---
+        var emailGuest = User.FindFirst(ClaimTypes.Email)?.Value ?? "guest@bbooking.com";
+        var pagamentoResponse = await _grpcClient.ElaboraPagamentoAsync(new PagamentoRequest
+        {
+            PrenotazioneId = 0, // Id reale non ancora noto
+            Importo = (double)totale,
+            EmailCliente = emailGuest
+        });
+        bool pagamentoCompletato = pagamentoResponse.Successo;
 
         var prenotazione = new Prenotazione
         {
@@ -74,7 +84,7 @@ public class PrenotazioniController : ControllerBase
             Totale = totale,
             GuestId = guestId,
             CasaVacanzeId = request.CasaVacanzeId,
-            Stato = pagamentoCompletato ? StatoPrenotazione.Confermata : StatoPrenotazione.InAttesa
+            Stato = pagamentoCompletato ? StatoPrenotazione.Confermata : StatoPrenotazione.Rifiutata
         };
 
         _db.Prenotazioni.Add(prenotazione);
@@ -84,9 +94,6 @@ public class PrenotazioniController : ControllerBase
 
         return Ok(prenotazione);
     }
-
-    // Metodo privato fittizio per simulare il gateway di pagamento
-    private bool SimulaPagamento(decimal importo) => importo > 0;
 }
 
 public record CreatePrenotazioneRequest(int CasaVacanzeId, DateTime DataInizio, DateTime DataFine);

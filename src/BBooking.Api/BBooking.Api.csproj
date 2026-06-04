@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="10.0.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.35.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.80.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.81.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
@@ -20,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BBooking.Models\BBooking.Models.csproj" />
     <ProjectReference Include="..\BBooking.Data\BBooking.Data.csproj" />
+    <Protobuf Include="..\BBooking.Grpc\Protos\pagamento.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>
