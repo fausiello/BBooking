@@ -1,2 +1,11 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BBooking.Api/BBooking.Api.csproj" />
+    <Project Path="src/BBooking.Data/BBooking.Data.csproj" />
+    <Project Path="src/BBooking.Grpc/BBooking.Grpc.csproj" />
+    <Project Path="src/BBooking.Models/BBooking.Models.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BBooking.Tests/BBooking.Tests.csproj" />
+  </Folder>
 </Solution>
