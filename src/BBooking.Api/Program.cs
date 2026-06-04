@@ -85,6 +85,13 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireGuestRole", policy => policy.RequireRole(RuoloUtente.Guest.ToString(), RuoloUtente.Admin.ToString()));
 });
 
+builder.Services.AddCors(options => 
+    options.AddPolicy("AllowBlazor", policy => 
+        policy.WithOrigins("https://localhost:5001", "http://localhost:5000")
+              .AllowAnyMethod()
+              .AllowAnyHeader())
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -97,6 +104,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Aggiungiamo i middleware nella pipeline HTTP in quest'ordine (prima delle rotte)
+app.UseCors("AllowBlazor");
 app.UseAuthentication();
 app.UseAuthorization();
 
