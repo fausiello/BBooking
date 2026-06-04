@@ -42,9 +42,6 @@ public class PrenotazioniController : ControllerBase
         var guestIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!int.TryParse(guestIdString, out int guestId)) return Unauthorized();
 
-        var casa = await _db.CaseVacanze.FindAsync(request.CasaVacanzeId);
-        if (casa == null) return NotFound("Casa vacanze non trovata.");
-
         if (request.DataInizio >= request.DataFine)
             return BadRequest("La data di fine deve essere successiva a quella d'inizio.");
 
@@ -57,11 +54,14 @@ public class PrenotazioniController : ControllerBase
 
         if (isOccupata)
         {
-            return BadRequest("La casa vacanze non è disponibile per le date selezionate.");
+            return BadRequest("La struttura non è disponibile nelle date selezionate.");
         }
 
-        // --- CALCOLO PREZZO ---
-        int notti = (request.DataFine - request.DataInizio).Days;
+        // 2. RECUPERO PREZZO E CALCOLO TOTALE
+        var casa = await _db.CaseVacanze.FindAsync(request.CasaVacanzeId);
+        if (casa == null) return NotFound("Casa vacanze non trovata.");
+
+        int notti = (int)(request.DataFine - request.DataInizio).TotalDays;
         decimal totale = casa.PrezzoPerNotte * notti;
 
         // --- SIMULAZIONE PAGAMENTO ---
@@ -74,7 +74,7 @@ public class PrenotazioniController : ControllerBase
             Totale = totale,
             GuestId = guestId,
             CasaVacanzeId = request.CasaVacanzeId,
-            Stato = pagamentoCompletato ? StatoPrenotazione.Confermata : StatoPrenotazione.Rifiutata
+            Stato = pagamentoCompletato ? StatoPrenotazione.Confermata : StatoPrenotazione.InAttesa
         };
 
         _db.Prenotazioni.Add(prenotazione);
